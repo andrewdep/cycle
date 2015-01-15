@@ -1,7 +1,9 @@
 ![NPM Downloads](http://img.shields.io/npm/dm/cycle.svg?style=flat) ![NPM Version](http://img.shields.io/npm/v/cycle.svg?style=flat)
 
 Fork of https://github.com/douglascrockford/JSON-js, maintained in npm as `cycle`.
-This fork enables the use of a 'replacer' to the decycle function itself.
+This fork enables the use of a 'replacer' to the decycle function and a 'reviver' to the retrocycle function. This allows
+replacers and revivers to operate more efficiently, especially in the case where a custom replacer is already replacing
+certain object graphs (with potential cycle references).
 
 # Contributors
 

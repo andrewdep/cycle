@@ -81,7 +81,7 @@ cycle.decycle = function decycle(object, replacer) {
             if (Object.prototype.toString.apply(value) === '[object Array]') {
                 nu = [];
                 for (i = 0; i < value.length; i += 1) {
-                    nu[i] = derez(value[i], path + '[' + i + ']', value, i);
+                    nu[i] = derez(value[i], path + '[' + i + ']', value, i.toString());
                 }
             } else {
 
@@ -102,7 +102,7 @@ cycle.decycle = function decycle(object, replacer) {
 };
 
 
-cycle.retrocycle = function retrocycle($) {
+cycle.retrocycle = function retrocycle($, reviver) {
     'use strict';
 
 // Restore an object that was reduced by decycle. Members whose values are
@@ -134,7 +134,7 @@ cycle.retrocycle = function retrocycle($) {
 // replaces the $ref object with a reference to the value that is found by
 // the path.
 
-        var i, item, name, path;
+        var i, item, name, path, newvalue;
 
         if (value && typeof value === 'object') {
             if (Object.prototype.toString.apply(value) === '[object Array]') {
@@ -144,9 +144,13 @@ cycle.retrocycle = function retrocycle($) {
                         path = item.$ref;
                         if (typeof path === 'string' && px.test(path)) {
                             value[i] = eval(path);
+                            continue;
                         } else {
                             rez(item);
                         }
+                    }
+                    if(reviver) {
+                        value[i] = reviver.call(value, i.toString(), value[i]);
                     }
                 }
             } else {
@@ -157,14 +161,23 @@ cycle.retrocycle = function retrocycle($) {
                             path = item.$ref;
                             if (typeof path === 'string' && px.test(path)) {
                                 value[name] = eval(path);
+                                continue;
                             } else {
                                 rez(item);
                             }
                         }
                     }
+                    if(reviver) {
+                        newvalue = reviver.call(value, name, value[name]);
+                        if(newvalue === undefined) {
+                            delete value[name];
+                        } else if(newvalue !== value[name]) {
+                            value[name] = newvalue;  
+                        }
+                    }
                 }
             }
         }
-    }($));
-    return $;
+    }($);
+    return reviver ? reviver.call({"":$}, "", $) : $;
 };
