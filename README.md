@@ -1,6 +1,7 @@
 ![NPM Downloads](http://img.shields.io/npm/dm/cycle.svg?style=flat) ![NPM Version](http://img.shields.io/npm/v/cycle.svg?style=flat)
 
 Fork of https://github.com/douglascrockford/JSON-js, maintained in npm as `cycle`.
+This fork enables the use of a 'replacer' to the decycle function itself.
 
 # Contributors
 

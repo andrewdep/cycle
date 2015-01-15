@@ -21,7 +21,7 @@
 
 var cycle = exports;
 
-cycle.decycle = function decycle(object) {
+cycle.decycle = function decycle(object, replacer) {
     'use strict';
 
 // Make a deep copy of an object or array, assuring that there is at most
@@ -43,8 +43,8 @@ cycle.decycle = function decycle(object) {
     var objects = [],   // Keep a reference to each unique object or array
         paths = [];     // Keep the path to each unique object or array
 
-    return (function derez(value, path) {
-
+    return (function derez(value_, path, parent, key) {
+      var value = replacer ? replacer.call(parent, key, value_) : value_;
 // The derez recurses through the object, producing the deep copy.
 
         var i,          // The loop counter
@@ -81,7 +81,7 @@ cycle.decycle = function decycle(object) {
             if (Object.prototype.toString.apply(value) === '[object Array]') {
                 nu = [];
                 for (i = 0; i < value.length; i += 1) {
-                    nu[i] = derez(value[i], path + '[' + i + ']');
+                    nu[i] = derez(value[i], path + '[' + i + ']', value, i);
                 }
             } else {
 
@@ -91,14 +91,14 @@ cycle.decycle = function decycle(object) {
                 for (name in value) {
                     if (Object.prototype.hasOwnProperty.call(value, name)) {
                         nu[name] = derez(value[name],
-                            path + '[' + JSON.stringify(name) + ']');
+                            path + '[' + JSON.stringify(name) + ']', value, name);
                     }
                 }
             }
             return nu;
         }
         return value;
-    }(object, '$'));
+    }(object, '$', {"": object}, ""));
 };
 
 
