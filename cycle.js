@@ -178,6 +178,6 @@ cycle.retrocycle = function retrocycle($, reviver) {
                 }
             }
         }
-    }($);
+    }($));
     return reviver ? reviver.call({"":$}, "", $) : $;
 };
