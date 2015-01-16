@@ -19,7 +19,9 @@
     retrocycle, stringify, test, toString
 */
 
-var cycle = exports;
+(function() {
+  
+var cycle = typeof exports !== 'undefined' ? exports : {};
 
 cycle.decycle = function decycle(object, replacer) {
     'use strict';
@@ -181,3 +183,12 @@ cycle.retrocycle = function retrocycle($, reviver) {
     }($));
     return reviver ? reviver.call({"":$}, "", $) : $;
 };
+  
+  if(typeof define !== 'undefined' && define.amd) {
+    define([], function() {
+      return cycle;
+    });
+  } else if(typeof exports !== 'undefined') {
+    this.cycle = cycle;
+  }
+}).call(this);
