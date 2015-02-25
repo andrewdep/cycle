@@ -22,8 +22,12 @@
 (function() {
   
 var cycle = typeof exports !== 'undefined' ? exports : {};
-
-cycle.decycle = function decycle(object, replacer) {
+  
+// Concerning timelimit: this is useful in certain cases where a developer may be unknowingly passing in a reference
+// to an API or some other structure with some potential nasty cycles that were never intended to be serialized.
+// We were running into a situation where performance was bogging down, as well as bandwidth and it would have been
+// better if things had failed faster.
+cycle.decycle = function decycle(object, replacer, timelimit) {
     'use strict';
 
 // Make a deep copy of an object or array, assuring that there is at most
@@ -43,7 +47,8 @@ cycle.decycle = function decycle(object, replacer) {
 // property.
 
     var objects = [],   // Keep a reference to each unique object or array
-        paths = [];     // Keep the path to each unique object or array
+        paths = [],     // Keep the path to each unique object or array
+        start = Date.now();
 
     return (function derez(value_, path, parent, key) {
       var value = replacer ? replacer.call(parent, key, value_) : value_;
@@ -77,6 +82,12 @@ cycle.decycle = function decycle(object, replacer) {
 
             objects.push(value);
             paths.push(path);
+            // We avoid the performance hit of calling Date.now() every single object...
+            if(objects.length % 20 === 0 && timelimit && Date.now() - start > timelimit) {
+              var err  = Error('Decycle took too long');
+              err.timeout = true;
+              throw err;
+            }
 
 // If it is an array, replicate the array.
 
